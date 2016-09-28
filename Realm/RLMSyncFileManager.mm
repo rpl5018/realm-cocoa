@@ -39,7 +39,13 @@ static NSString *const RLMSyncMetadataRealmName = @"sync_metadata.realm";
     dispatch_once(&onceToken, ^{
         // Create the path.
         NSFileManager *manager = [NSFileManager defaultManager];
-        NSURL *base = [NSURL fileURLWithPath:RLMDefaultDirectoryForBundleIdentifier(nil)];
+        NSString *bundleIdentifier = nil;
+        if (getenv("RLMProcessIsChild")) {
+            bundleIdentifier = ([NSBundle mainBundle].bundleIdentifier
+                                ?: [NSBundle mainBundle].executablePath.lastPathComponent);
+            bundleIdentifier = [NSString stringWithFormat:@"%@-child", bundleIdentifier];
+        }
+        NSURL *base = [NSURL fileURLWithPath:RLMDefaultDirectoryForBundleIdentifier(bundleIdentifier)];
         s_baseDirectory = [base URLByAppendingPathComponent:@"realm-object-server" isDirectory:YES];
 
         // If the directory does not already exist, create it.
